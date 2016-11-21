@@ -22,7 +22,7 @@ Payment Method Feature:
 
 #### Installation
 
-1. [Download](https://github.com/rizdaprasetya/vtweb-whmcs-v6.x/archive/snap.zip) the modules from this repository.
+1. [Download](/archive/master.zip) the modules from this repository.
 2. Extract `Whmcs-master.zip` file you have previously downloaded.
 3. Upload & merged module folder that you have extracted into your WHMCS directory. 
 

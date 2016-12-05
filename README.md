@@ -16,7 +16,7 @@ Payment Method Feature:
 
 #### Minimum Requirements
 
-* WHMCS v5.3.12 - v6.x or greater
+* WHMCS v5.3.12 - v6.x or greater (Tested up to WHMCS v7.0.2 - running well)
 * PHP version 5.4 or greater
 * MySQL version 5.0 or greater
 

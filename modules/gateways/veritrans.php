@@ -273,7 +273,7 @@ function veritrans_link($params)
             <a  target="_blank" href="#" id="instruction-button" title="View Payment Instruction">View Payment Instruction</a>
         </button>
         
-        <script src="'.$environmenturl.'"></script>
+        <script src="'.$environmenturl.'" data-client-key="'.$clientkey.'"></script>
         <script type="text/javascript">
             function fireSnap(){
                 snap.pay("'.$snapToken.'", {

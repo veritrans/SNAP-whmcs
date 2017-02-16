@@ -275,6 +275,7 @@ function veritrans_link($params)
         
         <script src="'.$environmenturl.'" data-client-key="'.$clientkey.'"></script>
         <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function(event) { 
             function fireSnap(){
                 snap.pay("'.$snapToken.'", {
                     onSuccess: function(result){
@@ -304,7 +305,7 @@ function veritrans_link($params)
             setTimeout(function(){
                 fireSnap();
             },500); 
-
+        });
         </script>
 
     ';

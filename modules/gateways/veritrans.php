@@ -72,6 +72,14 @@ function veritrans_config()
             'Value' => 'Midtrans',
         ),
         // a text field type allows for single line text input
+        'merchantid' => array(
+            'FriendlyName' => 'Midtrans Merchant ID',
+            'Type' => 'text',
+            'Size' => '50',
+            'Default' => '',
+            'Description' => 'Input your Merchant ID. Get it at dashboard.midtrans.com',
+        ),
+        // a text field type allows for single line text input
         'clientkey' => array(
             'FriendlyName' => 'Midtrans Client Key',
             'Type' => 'text',
@@ -119,6 +127,7 @@ function veritrans_config()
 function veritrans_link($params)
 {
     // Gateway Configuration Parameters
+    $merchantid = $params['merchantid'];
     $clientkey = $params['clientkey'];
     $serverkey = $params['serverkey'];
     $environment = $params['environment'];
@@ -265,20 +274,65 @@ function veritrans_link($params)
 
     $enable3dsval = Veritrans_Config::$is3ds ? "true" : "false";
     $amount = ceil($amount);
-    $environmenturl = Veritrans_Config::$isProduction ? "https://app.midtrans.com/snap/snap.js" : "https://app.sandbox.midtrans.com/snap/snap.js";;
+    $environmenturl = Veritrans_Config::$isProduction ? "https://app.midtrans.com/snap/snap.js" : "https://app.sandbox.midtrans.com/snap/snap.js";
+    $mixpanelkey = Veritrans_Config::$isProduction ? "17253088ed3a39b1e2bd2cbcfeca939a" : "9dcba9b440c831d517e8ff1beff40bd9";
 
     $htmlOutput1 .=  '
         <button class="submit-button" id="snap-pay">Proceed To Payment</button>
         <button class="submit-button" id="snap-instruction" style="display:none;">
             <a  target="_blank" href="#" id="instruction-button" title="View Payment Instruction">View Payment Instruction</a>
         </button>
-        
-        <script src="'.$environmenturl.'" data-client-key="'.$clientkey.'"></script>
-        <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function(event) { 
+
+        <!-- start Mixpanel -->
+        <script data-cfasync="false" type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);mixpanel.init("'.$mixpanelkey.'");</script>
+        <!-- end Mixpanel -->
+
+        <script data-cfasync="false" src="'.$environmenturl.'" data-client-key="'.$clientkey.'"></script>
+        <script data-cfasync="false" type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function(event) {
+            function MixpanelTrackResult(token, merchant_id, cms_name, cms_version, plugin_name, status, result) {
+                var eventNames = {
+                    success: "pg-success",
+                    pending: "pg-pending",
+                    error: "pg-error",
+                    close: "pg-close"
+                };
+                mixpanel.track(
+                    eventNames[status], 
+                    {
+                        merchant_id: merchant_id,
+                        cms_name: cms_name,
+                        cms_version: cms_version,
+                        plugin_name: plugin_name,
+                        snap_token: token,
+                        payment_type: result ? result.payment_type: null,
+                        order_id: result ? result.order_id: null,
+                        status_code: result ? result.status_code: null,
+                        gross_amount: result && result.gross_amount ? Number(result.gross_amount) : null,
+                    }
+                );
+            }
+
+            var SNAP_TOKEN = "'.$snapToken.'";
+            var MERCHANT_ID = "'.$merchantid.'";
+            var CMS_NAME = "whmcs";
+            var CMS_VERSION = "'.$whmcsVersion.'";
+            var PLUGIN_NAME = "whmcs"; 
+
             function fireSnap(){
+                // record pay event to Mixpanel
+                mixpanel.track(
+                    "pg-pay", {
+                        merchant_id: MERCHANT_ID,
+                        cms_name: CMS_NAME,
+                        cms_version: CMS_VERSION,
+                        plugin_name: PLUGIN_NAME,
+                        snap_token: SNAP_TOKEN
+                    }
+                );
                 snap.pay("'.$snapToken.'", {
                     onSuccess: function(result){
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "success", result);
                         document.getElementsByClassName("unpaid")[0].innerHTML = "Payment Completed!";
                         setTimeout(function(){
                             window.location = "'.$returnUrl.'";
@@ -286,13 +340,18 @@ function veritrans_link($params)
                     },
                     onPending: function(result){
                         // window.location = "'.$returnUrl.'";
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "pending", result);
                         document.getElementById("instruction-button").href = result.pdf_url;
                         document.getElementById("snap-instruction").style.display = "block";
                         document.getElementById("snap-pay").style.display = "none";
                         document.getElementsByClassName("unpaid")[0].innerHTML = "Awaiting Payment";
                     },
                     onError: function(result){
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "error", result);
                         window.location = "'.$returnUrl.'";
+                    },
+                    onClose: function(){
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "close", null);
                     }
                 });
             }; 

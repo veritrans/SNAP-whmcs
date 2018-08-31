@@ -107,6 +107,11 @@ function veritrans_config()
             'Type' => 'yesno',
             'Description' => 'Tick to enable 3DS for Credit Card payment',
         ),
+        'snapredirect' => array(
+            'FriendlyName' => 'Payment Redirect To Midtrans',
+            'Type' => 'yesno',
+            'Description' => 'Tick to make payment page redirect to Midtrans, instead of popup (recommended to set it: off)',
+        ),
     );
 }
 
@@ -132,6 +137,7 @@ function veritrans_link($params)
     $serverkey = $params['serverkey'];
     $environment = $params['environment'];
     $enable3ds = $params['enable3ds'];
+    $snapredirect = $params['snapredirect'];
 
     // Invoice Parameters
     $invoiceId = $params['invoiceid'];
@@ -211,10 +217,11 @@ function veritrans_link($params)
     // error_log("===== params :"); //debugan
     // error_log(print_r($params,true)); //debugan
 
+    $params['callbacks'] = array('finish' => $returnUrl );
     // Get snap token
     try {
         $snapToken = Veritrans_Snap::getSnapToken($params);
-        // $url = Veritrans_VtWeb::getRedirectionUrl($params);
+        $url = Veritrans_Snap::createTransaction($params)->redirect_url;
         // error_log(" ############# TOKEN ::: ".$snapToken);
     } catch (Exception $e) {
         // error_log('Caught exception: ',  $e->getMessage(), "\n");
@@ -234,6 +241,9 @@ function veritrans_link($params)
     $htmlOutput .= '</form>';
     // =============================================== End of VT Web =======================
     
+    if ($snapredirect == 'on'){
+        return $htmlOutput;
+    }
 
 
     // ====================================== Html output for SNAP ====================

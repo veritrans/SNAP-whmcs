@@ -43,7 +43,7 @@ Payment Method Feature:
 
 #### Troubleshooting
 
-If you enconter payment popup not being properly opened on invoice page, try these solution:
+If you encounter payment popup not being properly opened on invoice page, try these solution:
 
 On menu `Setup -> Payments -> Payment Gateways`, tick option `Payment Redirect To Midtrans`. Customer will be redirected to Midtrans instead of popup. This can minimize popup issue.
 

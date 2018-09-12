@@ -41,6 +41,12 @@ Payment Method Feature:
    * Unfinish Redirect URL: `http://[your website url]`
    * Error Redirect URL: `http://[your website url]`
 
+#### Troubleshooting
+
+If you encounter payment popup not being properly opened on invoice page, try these solution:
+
+On menu `Setup -> Payments -> Payment Gateways`, tick option `Payment Redirect To Midtrans`. Customer will be redirected to Midtrans instead of popup. This can minimize popup issue.
+
 #### Get help
 
 * [Midtrans&nbsp;](https://www.midtrans.com)

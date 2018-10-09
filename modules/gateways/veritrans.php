@@ -120,6 +120,11 @@ function veritrans_config()
             'Default' => '500000',
             'Description' => 'Minimum allowed amount for installment payment, amount below this value will not be eligible for installment',
         ),
+        'enableSaveCard' => array(
+            'FriendlyName' => 'Allow Customer to Save Card for Next Payment',
+            'Type' => 'yesno',
+            'Description' => 'Tick to allow Credit Card to be saved on Midtrans payment page, to be used for next payment',
+        ),
         'snapredirect' => array(
             'FriendlyName' => 'Payment Redirect To Midtrans',
             'Type' => 'yesno',
@@ -151,6 +156,7 @@ function veritrans_link($params)
     $environment = $params['environment'];
     $enable3ds = $params['enable3ds'];
     $enableInstallment = $params['enableInstallment'];
+    $enableSaveCard = $params['enableSaveCard'];
     $minimumInstallmentAmount = $params['minimumInstallmentAmount'];
     $snapredirect = $params['snapredirect'];
 
@@ -249,6 +255,12 @@ function veritrans_link($params)
           'bca' => $terms,
           'cimb' => $terms
         );
+    }
+
+    // Build one click / two click param
+    if($enableSaveCard == 'on'){
+        $params['user_id'] = crypt( $email.$phone , Veritrans_Config::$serverKey );
+        $params['credit_card']['save_card'] = true;
     }
 
     // Get snap token

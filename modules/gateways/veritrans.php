@@ -105,6 +105,7 @@ function veritrans_config()
         'enable3ds' => array(
             'FriendlyName' => 'Credit Card 3DS',
             'Type' => 'yesno',
+            'Default' => 'on',
             'Description' => 'Tick to enable 3DS for Credit Card payment (recommended to set it: on)',
         ),
         'snapredirect' => array(

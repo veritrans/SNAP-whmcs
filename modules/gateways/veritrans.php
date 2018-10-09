@@ -220,8 +220,9 @@ function veritrans_link($params)
     $params['callbacks'] = array('finish' => $returnUrl );
     // Get snap token
     try {
-        $snapToken = Veritrans_Snap::getSnapToken($params);
-        $url = Veritrans_Snap::createTransaction($params)->redirect_url;
+        $snap_transaction = Veritrans_Snap::createTransaction($params);
+        $snapToken = $snap_transaction->token;
+        $redirect_url = $snap_transaction->redirect_url;
         // error_log(" ############# TOKEN ::: ".$snapToken);
     } catch (Exception $e) {
         // error_log('Caught exception: ',  $e->getMessage(), "\n");
@@ -233,7 +234,7 @@ function veritrans_link($params)
 
 
     // ====================================== Html output for VT Web =======================
-    $htmlOutput = '<form method="get" action="' . $url . '">';
+    $htmlOutput = '<form method="get" action="' . $redirect_url . '">';
     foreach ($postfields as $k => $v) {
         $htmlOutput .= '<input type="hidden" name="' . $k . '" value="' . urlencode($v) . '" />';
     }

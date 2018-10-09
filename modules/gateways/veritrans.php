@@ -297,6 +297,9 @@ function veritrans_link($params)
     $htmlOutput1 = '';
     // JS script
     
+    // Bogus form to disable auto submit / redirect
+    $htmlOutput1 = '<form onsubmit="return false"></form>';
+    
     // $htmlOutput1 .='
     // <script> 
     // try {
@@ -311,21 +314,25 @@ function veritrans_link($params)
     // }
     // </script>
     // ';  // disable form auto submit
-    // $htmlOutput1 .='
-    // <script>
-    // try {
-    //     $(\'[class*="alert alert-info text-center"]\').text("Please Complete Your Credit Card Payment :");
-    // } catch (e){
-    //     console.log("failed to change text for WHMCS 6");
-    // }
-    // try {
-    //     $(\'[class*="alert alert-block alert-warn textcenter"]\').text("Please Complete Your Credit Card Payment :");
-    // } catch (e){
-    //     console.log("failed to change text for WHMCS 5");
-    // }
-    // $(\'[alt*="Loading"]\').hide();
-    // </script>
-    // ';  // disable form auto submit
+
+    // Change default WHMCS messaging and hide loading image.
+    $htmlOutput1 .='
+    <script>
+    try {
+        document.querySelector("[class*=\"alert alert-info text-center\"]").innerText = "Please Complete Your Payment :";
+    } catch (e){
+        console.log("failed to change text for WHMCS 6");
+    }
+    try {
+        document.querySelector("[class*=\"alert alert-block alert-warn textcenter\"]").innerText = "Please Complete Your Credit Card Payment :";
+    } catch (e){
+        console.log("failed to change text for WHMCS 5");
+    }
+    try{
+        document.querySelector(\'[alt*="Loading"]\').style.display = "none";
+    } catch(e){}
+    </script>
+    ';  // disable form auto submit
 
 
     $amount = ceil($amount);
@@ -388,7 +395,9 @@ function veritrans_link($params)
                 snap.pay("'.$snapToken.'", {
                     onSuccess: function(result){
                         MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "success", result);
-                        document.getElementsByClassName("unpaid")[0].innerHTML = "Payment Completed!";
+                        try{
+                            document.getElementsByClassName("unpaid")[0].innerHTML = "Payment Completed!";
+                        } catch (e){}
                         setTimeout(function(){
                             window.location = "'.$returnUrl.'";
                         },2000); 
@@ -396,10 +405,12 @@ function veritrans_link($params)
                     onPending: function(result){
                         // window.location = "'.$returnUrl.'";
                         MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "pending", result);
-                        document.getElementById("instruction-button").href = result.pdf_url;
-                        document.getElementById("snap-instruction").style.display = "block";
-                        document.getElementById("snap-pay").style.display = "none";
-                        document.getElementsByClassName("unpaid")[0].innerHTML = "Awaiting Payment";
+                        try{
+                            document.getElementById("instruction-button").href = result.pdf_url;
+                            document.getElementById("snap-instruction").style.display = "block";
+                            document.getElementById("snap-pay").style.display = "none";
+                            document.getElementsByClassName("unpaid")[0].innerHTML = "Awaiting Payment";
+                        } catch (e){}
                     },
                     onError: function(result){
                         MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "error", result);

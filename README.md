@@ -16,7 +16,7 @@ Payment Method Feature:
 
 #### Minimum Requirements
 
-* WHMCS v5.3.12 - v6.x or greater (Tested up to WHMCS v7.0.2 - running well)
+* WHMCS v5.3.12 - v7.x or greater (Tested up to WHMCS v7.6 - running well)
 * PHP version 5.4 or greater
 * MySQL version 5.0 or greater
 
@@ -24,7 +24,7 @@ Payment Method Feature:
 
 1. [Download](../../archive/master.zip) the modules from this repository.
 2. Extract `Whmcs-master.zip` file you have previously downloaded.
-3. Upload & merged module folder that you have extracted into your WHMCS directory. 
+3. Upload & merge `modules` folder that you have extracted into your WHMCS directory `modules` folder. 
 
 #### Installation & Configuration
 

@@ -108,6 +108,18 @@ function veritrans_config()
             'Default' => 'on',
             'Description' => 'Tick to enable 3DS for Credit Card payment (recommended to set it: on)',
         ),
+        'enableInstallment' => array(
+            'FriendlyName' => 'Allow Credit Card Installment Payment',
+            'Type' => 'yesno',
+            'Description' => 'Tick to allow payment using Credit Card Installment (Please make sure you have active Installment feature on Midtrans, otherwise set this to: off)',
+        ),
+        'minimumInstallmentAmount' => array(
+            'FriendlyName' => 'Minimum Amount For Installment',
+            'Type' => 'text',
+            'Size' => '25',
+            'Default' => '500000',
+            'Description' => 'Minimum allowed amount for installment payment, amount below this value will not be eligible for installment',
+        ),
         'snapredirect' => array(
             'FriendlyName' => 'Payment Redirect To Midtrans',
             'Type' => 'yesno',
@@ -138,6 +150,8 @@ function veritrans_link($params)
     $serverkey = $params['serverkey'];
     $environment = $params['environment'];
     $enable3ds = $params['enable3ds'];
+    $enableInstallment = $params['enableInstallment'];
+    $minimumInstallmentAmount = $params['minimumInstallmentAmount'];
     $snapredirect = $params['snapredirect'];
 
     // Invoice Parameters
@@ -219,6 +233,24 @@ function veritrans_link($params)
     // error_log(print_r($params,true)); //debugan
 
     $params['callbacks'] = array('finish' => $returnUrl );
+
+    // Build Installment param
+    if($enableInstallment == 'on' && $amount >=  (int)$minimumInstallmentAmount){
+        $terms = array(3,6,9,12,15,18,21,24,27,30,33,36);
+        // Add installment param
+        $params['credit_card']['installment']['required'] = false;
+        $params['credit_card']['installment']['terms'] = 
+        array(
+          'bri' => $terms, 
+          'danamon' => $terms, 
+          'maybank' => $terms, 
+          'bni' => $terms, 
+          'mandiri' => $terms, 
+          'bca' => $terms,
+          'cimb' => $terms
+        );
+    }
+
     // Get snap token
     try {
         $snap_transaction = Veritrans_Snap::createTransaction($params);
@@ -284,7 +316,6 @@ function veritrans_link($params)
     // ';  // disable form auto submit
 
 
-    $enable3dsval = Veritrans_Config::$is3ds ? "true" : "false";
     $amount = ceil($amount);
     $environmenturl = Veritrans_Config::$isProduction ? "https://app.midtrans.com/snap/snap.js" : "https://app.sandbox.midtrans.com/snap/snap.js";
     $mixpanelkey = Veritrans_Config::$isProduction ? "17253088ed3a39b1e2bd2cbcfeca939a" : "9dcba9b440c831d517e8ff1beff40bd9";

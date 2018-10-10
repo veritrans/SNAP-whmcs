@@ -125,7 +125,7 @@ function veritrans_config()
             'Type' => 'yesno',
             'Description' => 'Tick to allow Credit Card to be saved on Midtrans payment page, to be used for next payment',
         ),
-        'snapredirect' => array(
+        'enableSnapRedirect' => array(
             'FriendlyName' => 'Payment Redirect To Midtrans',
             'Type' => 'yesno',
             'Description' => 'Tick to make payment page redirect to Midtrans, instead of popup (recommended to set it: off)',
@@ -158,7 +158,7 @@ function veritrans_link($params)
     $enableInstallment = $params['enableInstallment'];
     $enableSaveCard = $params['enableSaveCard'];
     $minimumInstallmentAmount = $params['minimumInstallmentAmount'];
-    $snapredirect = $params['snapredirect'];
+    $enableSnapRedirect = $params['enableSnapRedirect'];
 
     // Invoice Parameters
     $invoiceId = $params['invoiceid'];
@@ -287,7 +287,7 @@ function veritrans_link($params)
     $htmlOutput .= '</form>';
     // =============================================== End of VT Web =======================
     
-    if ($snapredirect == 'on'){
+    if ($enableSnapRedirect == 'on'){
         return $htmlOutput;
     }
 

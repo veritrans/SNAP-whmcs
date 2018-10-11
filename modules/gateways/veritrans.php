@@ -80,7 +80,7 @@ function veritrans_config()
             'Type' => 'text',
             'Size' => '50',
             'Default' => '',
-            'Description' => 'Input your Merchant ID. Get it at dashboard.midtrans.com',
+            'Description' => '<br>Input your Merchant ID. Get it at dashboard.midtrans.com',
         ),
         // a text field type allows for single line text input
         'clientkey' => array(
@@ -88,7 +88,7 @@ function veritrans_config()
             'Type' => 'text',
             'Size' => '50',
             'Default' => '',
-            'Description' => 'Input your Client Server Key. Get it at dashboard.midtrans.com',
+            'Description' => '<br>Input your Client Server Key. Get it at dashboard.midtrans.com',
         ),
         // a text field type allows for single line text input
         'serverkey' => array(
@@ -96,7 +96,7 @@ function veritrans_config()
             'Type' => 'text',
             'Size' => '50',
             'Default' => '',
-            'Description' => 'Input your Midtrans Server Key. Get it at dashboard.midtrans.com',
+            'Description' => '<br>Input your Midtrans Server Key. Get it at dashboard.midtrans.com',
         ),
         // the dropdown field type renders a select menu of options
         'environment' => array(
@@ -126,35 +126,35 @@ function veritrans_config()
             'Type' => 'text',
             'Size' => '25',
             'Default' => '500000',
-            'Description' => 'Minimum allowed amount for installment payment, amount below this value will not be eligible for installment',
+            'Description' => '<br>Minimum allowed amount for installment payment, amount below this value will not be eligible for installment',
         ),
         'installmentTerms' => array(
             'FriendlyName' => 'Installment terms for Credit Card',
             'Type' => 'text',
             'Size' => '64',
             'Default' => '3,6,12',
-            'Description' => 'Installment terms separated by coma e.g: 3,6,12 (leave it default if you are not sure)',
+            'Description' => '<br>Installment terms separated by coma e.g: 3,6,12 (leave it default if you are not sure)',
         ),
         'whitelistBins' => array(
             'FriendlyName' => 'Whitelisted Bins for Credit Card',
             'Type' => 'text',
             'Size' => '256',
             'Default' => '',
-            'Description' => 'Only allow customer pay with the whitelisted Bins only, input Bins separated by coma e.g: 481234,521117 (leave it default if you are not sure)',
+            'Description' => '<br>Only allow customer pay with the whitelisted Bins only, input Bins separated by coma e.g: 481234,521117 (leave it default if you are not sure)',
         ),
         'customExpiry' => array(
             'FriendlyName' => 'Custom Expiry',
             'Type' => 'text',
             'Size' => '25',
             'Default' => '',
-            'Description' => 'This will allow you to set custom duration on how long the transaction available to be paid. e.g: 24 hours (leave it default if you are not sure)',
+            'Description' => '<br>This will allow you to set custom duration on how long the transaction available to be paid. e.g: 24 hours (leave it default if you are not sure)',
         ),
         'enabledPayments' => array(
             'FriendlyName' => 'Enabled Payments',
             'Type' => 'text',
             'Size' => '25',
             'Default' => '',
-            'Description' => 'This will allow you to set custom activated payment method in Midtrans payment page. Separate payment method code with coma e.g: bank_transfer,credit_card (leave it default if you are not sure)',
+            'Description' => '<br>This will allow you to set custom activated payment method in Midtrans payment page. Separate payment method code with coma e.g: bank_transfer,credit_card (leave it default if you are not sure)',
         ),
         'enableSaveCard' => array(
             'FriendlyName' => 'Allow Customer to Save Card for Next Payment',

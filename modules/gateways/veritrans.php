@@ -109,9 +109,14 @@ function veritrans_config()
             'Description' => 'Tick to enable 3DS for Credit Card payment (recommended to set it: on)',
         ),
         'enableInstallment' => array(
-            'FriendlyName' => 'Allow Credit Card Installment Payment',
+            'FriendlyName' => 'Allow Credit Card Online Installment Payment',
             'Type' => 'yesno',
-            'Description' => 'Tick to allow payment using Credit Card Installment (Please make sure you have active Installment feature on Midtrans, otherwise set this to: off)',
+            'Description' => 'Tick to allow payment using Credit Card Online Installment (Please make sure you have active Installment feature on Midtrans, otherwise set this to: off)',
+        ),
+        'enableInstallmentOffline' => array(
+            'FriendlyName' => 'Allow Credit Card Offline Installment Payment',
+            'Type' => 'yesno',
+            'Description' => 'Tick to allow payment using Credit Card Offline Installment (Please make sure you have active Installment feature on Midtrans, otherwise set this to: off)',
         ),
         'minimumInstallmentAmount' => array(
             'FriendlyName' => 'Minimum Amount For Installment',
@@ -119,6 +124,20 @@ function veritrans_config()
             'Size' => '25',
             'Default' => '500000',
             'Description' => 'Minimum allowed amount for installment payment, amount below this value will not be eligible for installment',
+        ),
+        'installmentTerms' => array(
+            'FriendlyName' => 'Installment terms for Credit Card',
+            'Type' => 'text',
+            'Size' => '64',
+            'Default' => '3,6,12',
+            'Description' => 'Installment terms separated by coma e.g: 3,6,12 (leave it default if you are not sure)',
+        ),
+        'whitelistBins' => array(
+            'FriendlyName' => 'Whitelisted Bins for Credit Card',
+            'Type' => 'text',
+            'Size' => '256',
+            'Default' => '',
+            'Description' => 'Only allow customer pay with the whitelisted Bins only, input Bins separated by coma e.g: 481234,521117 (leave it default if you are not sure)',
         ),
         'enableSaveCard' => array(
             'FriendlyName' => 'Allow Customer to Save Card for Next Payment',
@@ -156,7 +175,10 @@ function veritrans_link($params)
     $environment = $params['environment'];
     $enable3ds = $params['enable3ds'];
     $enableInstallment = $params['enableInstallment'];
+    $enableInstallmentOffline = $params['enableInstallmentOffline'];
+    $installmentTerms = $params['installmentTerms'];
     $enableSaveCard = $params['enableSaveCard'];
+    $whitelistBins = $params['whitelistBins'];
     $minimumInstallmentAmount = $params['minimumInstallmentAmount'];
     $enableSnapRedirect = $params['enableSnapRedirect'];
 
@@ -242,7 +264,8 @@ function veritrans_link($params)
 
     // Build Installment param
     if($enableInstallment == 'on' && $amount >=  (int)$minimumInstallmentAmount){
-        $terms = array(3,6,9,12,15,18,21,24,27,30,33,36);
+        $terms = explode(',', $installmentTerms);
+        $terms = array_map(function($e){return (int)$e;}, $terms);
         // Add installment param
         $params['credit_card']['installment']['required'] = false;
         $params['credit_card']['installment']['terms'] = 
@@ -255,6 +278,18 @@ function veritrans_link($params)
           'bca' => $terms,
           'cimb' => $terms
         );
+    }
+
+    if ($enableInstallmentOffline == 'on' && $amount >= (int)$minimumInstallmentAmount) {
+        $terms = explode(',', $installmentTerms);
+        $terms = array_map(function($e){return (int)$e;}, $terms);
+        // Add installment param
+        $params['credit_card']['installment']['required'] = true;
+        $params['credit_card']['installment']['terms'] = array( 'offline' => $terms );
+    }
+
+    if(strlen($whitelistBins)>1){
+        $params['credit_card']['whitelist_bins'] = explode(',', $whitelistBins);
     }
 
     // Build one click / two click param

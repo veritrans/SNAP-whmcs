@@ -19,11 +19,6 @@ if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
 
-/**
- * Just copy things from veritrans.php
- */
-// require_once(dirname(__FILE__) . '/veritrans.php');
-
 function veritranspromo_MetaData()
 {
     return array(
@@ -35,6 +30,8 @@ function veritranspromo_MetaData()
 }
 function veritranspromo_config()
 {
+    // Just copy things from veritrans.php and change the name
+    require_once(dirname(__FILE__) . '/veritrans.php');
     $config = veritrans_config();
     $config['FriendlyName']['Value']='Midtrans Additional Payment';
     return $config;

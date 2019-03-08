@@ -47,7 +47,7 @@ class Veritrans_ApiRequestor {
         'Authorization: Basic ' . base64_encode($server_key . ':')
       ),
       CURLOPT_RETURNTRANSFER => 1,
-      CURLOPT_CAINFO => dirname(__FILE__) . "/../data/cacert.pem"
+      // CURLOPT_CAINFO => dirname(__FILE__) . "/../data/cacert.pem"
     );
 
     // merging with Veritrans_Config::$curlOptions
@@ -92,7 +92,7 @@ class Veritrans_ApiRequestor {
       try {
         $result_array = json_decode($result);
       } catch (Exception $e) {
-        throw new Exception("API Request Error unable to json_decode API response: ".$result);
+        throw new Exception("API Request Error unable to json_decode API response: ".$result . ' | Request url: '.$url);
       }
       if (!in_array($result_array->status_code, array(200, 201, 202, 407))) {
         $message = 'Veritrans Error (' . $result_array->status_code . '): '

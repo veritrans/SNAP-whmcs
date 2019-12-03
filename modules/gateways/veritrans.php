@@ -166,6 +166,11 @@ function veritrans_config()
             'Type' => 'yesno',
             'Description' => 'Tick to make payment page redirect to Midtrans, instead of popup (recommended to set it: off)',
         ),
+        'useInvoiceAmountAsPaid' => array(
+            'FriendlyName' => 'Use Invoice amount as paid amount',
+            'Type' => 'yesno',
+            'Description' => 'Only use this if you use other than IDR currency, and encounter amount mismatch issue on paid invoice (recommended to set it: off)',
+        ),
     );
 }
 
@@ -200,6 +205,7 @@ function veritrans_link($params)
     $enabledPayments = $params['enabledPayments'];
     $minimumInstallmentAmount = $params['minimumInstallmentAmount'];
     $enableSnapRedirect = $params['enableSnapRedirect'];
+    $useInvoiceAmountAsPaid = $params['useInvoiceAmountAsPaid'];
 
     // Invoice Parameters
     $invoiceId = $params['invoiceid'];

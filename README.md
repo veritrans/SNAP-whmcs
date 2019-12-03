@@ -23,7 +23,7 @@ Payment Method Feature:
 #### Installation
 
 1. [Download](../../archive/master.zip) the modules from this repository.
-2. Extract `Whmcs-master.zip` file you have previously downloaded.
+2. Extract `snap-whmcs-master.zip` file you have previously downloaded.
 3. Upload & merge `modules` folder that you have extracted into your WHMCS directory `modules` folder. 
 
 #### Installation & Configuration
@@ -46,6 +46,10 @@ Payment Method Feature:
 If you encounter payment popup not being properly opened on invoice page, try these solution:
 
 On menu `Setup -> Payments -> Payment Gateways`, tick option `Payment Redirect To Midtrans`. Customer will be redirected to Midtrans instead of popup. This can minimize popup issue.
+
+If you use non IDR currency on WHMCS and encounter issue of paid amount is too big or does not match with invoice amount: 
+
+Try to enable configuration `Use Invoice amount as paid amount` to use the invoice amount as paid amount. Note: this will also means it will not check the actual paid amount on Payment Gateway, but it can avoid currency conversion issues.
 
 #### Get help
 

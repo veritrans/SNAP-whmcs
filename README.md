@@ -51,6 +51,8 @@ If you use non IDR currency on WHMCS and encounter issue of paid amount is too b
 
 Try to enable configuration `Use Invoice amount as paid amount` to use the invoice amount as paid amount. Note: this will also means it will not check the actual paid amount on Payment Gateway, but it can avoid currency conversion issues.
 
+Or Try to enable `Try convert back paid amount currency` to try to convert back from paid amount in IDR to original customer currency, using builtin WHMCS converter. Note: WHMCS converter may not 100% accurate.
+
 #### Get help
 
 * [Midtrans&nbsp;](https://www.midtrans.com)

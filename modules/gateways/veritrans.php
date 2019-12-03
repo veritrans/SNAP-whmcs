@@ -169,7 +169,12 @@ function veritrans_config()
         'useInvoiceAmountAsPaid' => array(
             'FriendlyName' => 'Use Invoice amount as paid amount',
             'Type' => 'yesno',
-            'Description' => 'Only use this if you use other than IDR currency, and encounter amount mismatch issue on paid invoice (recommended to set it: off)',
+            'Description' => 'Only use this IF YOU USE OTHER THAN IDR currency, and encounter amount mismatch issue on paid invoice, this will use invoice amount as paid amount (recommended to set it: off)',
+        ),
+        'tryToConvertCurrencyBack' => array(
+            'FriendlyName' => 'Try convert back paid amount currency',
+            'Type' => 'yesno',
+            'Description' => 'Only use this IF YOU USE OTHER THAN IDR currency, and encounter amount mismatch issue on paid invoice, this will try to convert back to original invoice currency amount (recommended to set it: off)',
         ),
     );
 }
@@ -206,6 +211,7 @@ function veritrans_link($params)
     $minimumInstallmentAmount = $params['minimumInstallmentAmount'];
     $enableSnapRedirect = $params['enableSnapRedirect'];
     $useInvoiceAmountAsPaid = $params['useInvoiceAmountAsPaid'];
+    $tryToConvertCurrencyBack = $params['tryToConvertCurrencyBack'];
 
     // Invoice Parameters
     $invoiceId = $params['invoiceid'];

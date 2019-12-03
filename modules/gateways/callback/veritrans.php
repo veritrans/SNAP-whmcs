@@ -65,6 +65,17 @@ $paymentFee = 0;
 $invoiceId = checkCbInvoiceID($invoiceId, $gatewayParams['name']);
 
 /**
+ * If useInvoiceAmountAsPaid enabled, use the invoice amount, as paid amount
+ * this to avoid currency conversion issue on non IDR WHMCS transaction
+ */
+
+if ($gatewayParams['useInvoiceAmountAsPaid'] == 'on') {
+  $invoice_result = mysql_fetch_assoc(select_query('tblinvoices', 'total, userid', array("id"=>$order_id)));
+  $invoice_amount = $invoice_result['total'];
+  $paymentAmount = $invoice_amount;
+}
+
+/**
  * Log Transaction.
  *
  * Add an entry to the Gateway Log for debugging purposes.

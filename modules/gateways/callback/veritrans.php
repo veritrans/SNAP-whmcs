@@ -79,25 +79,28 @@ if ($gatewayParams['useInvoiceAmountAsPaid'] == 'on') {
  * Of tryToConvertCurrencyBack enabled
  * Try to convert amount back to IDR, if not IDR
  */
-
-if (strlen($gatewayParams['tryToConvertCurrencyBack']) > 1) {
-  // Fetch invoice to get the amount and userid
-  $invoice_result = mysql_fetch_assoc(select_query('tblinvoices', 'total, userid', array("id"=>$order_id))); 
-  $invoice_amount = $invoice_result['total'];
-  // Check if amount is IDR, convert if not.
-  $client_result = mysql_fetch_assoc(select_query('tblclients', 'currency', array("id"=>$invoice_result['userid'])));
-  $currency_id = $client_result['currency'];
-  $idr_currency_id = $gatewayParams['convertto'];
-  if($currency_id != $idr_currency_id) {
-      $converted_amount = convertCurrency(
-        $veritrans_notification->gross_amount, 
-        $idr_currency_id, 
-        $currency_id
-      );
-  } else {
-      $converted_amount = $invoice_amount;
+if ($gatewayParams['tryToConvertCurrencyBack'] == 'on') {
+  try {
+    // Fetch invoice to get the amount and userid
+    $invoice_result = mysql_fetch_assoc(select_query('tblinvoices', 'total, userid', array("id"=>$order_id))); 
+    $invoice_amount = $invoice_result['total'];
+    // Check if amount is IDR, convert if not.
+    $client_result = mysql_fetch_assoc(select_query('tblclients', 'currency', array("id"=>$invoice_result['userid'])));
+    $currency_id = $client_result['currency'];
+    $idr_currency_id = $gatewayParams['convertto'];
+    if($currency_id != $idr_currency_id) {
+        $converted_amount = convertCurrency(
+          $veritrans_notification->gross_amount, 
+          $idr_currency_id, 
+          $currency_id
+        );
+    } else {
+        $converted_amount = $invoice_amount;
+    }
+    $paymentAmount = $converted_amount;
+  } catch (Exception $e) {
+    echo "fail to tryToConvertCurrencyBack";
   }
-  $paymentAmount = $converted_amount;
 }
 
 /**

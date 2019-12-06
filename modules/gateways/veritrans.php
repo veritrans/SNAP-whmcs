@@ -410,7 +410,7 @@ function veritrans_link($params)
     $htmlOutput1 .='
     <script>
     try {
-        document.querySelector("[class*=\"alert alert-info text-center\"]").innerText = "Please Complete Your Payment :";
+        document.querySelector("[class*=\"alert alert-info text-center\"]").innerText = "Please Complete Your Payment";
     } catch (e){
         console.log("failed to change text for WHMCS 6");
     }
@@ -500,8 +500,12 @@ function veritrans_link($params)
                         // window.location = "'.$returnUrl.'";
                         MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, PLUGIN_VERSION, "pending", result);
                         try{
-                            document.getElementById("instruction-button").href = result.pdf_url;
-                            document.getElementById("snap-instruction").style.display = "block";
+                            if(result.pdf_url){
+                                document.getElementById("instruction-button").href = result.pdf_url;
+                                document.getElementById("snap-instruction").style.display = "block";
+                            } else {
+                                // some payment doesnt have pdf url, put no link.
+                            }
                             document.getElementById("snap-pay").style.display = "none";
                             document.getElementsByClassName("unpaid")[0].innerHTML = "Awaiting Payment";
                         } catch (e){}

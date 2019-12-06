@@ -195,6 +195,10 @@ function veritrans_config()
  */
 function veritrans_link($params)
 {
+    // @TODO: Find proper versioning method
+    // Hardcoded version. 
+    $pluginVersion = '1.1';
+
     // Gateway Configuration Parameters
     $merchantid = $params['merchantid'];
     $clientkey = $params['clientkey'];
@@ -439,7 +443,7 @@ function veritrans_link($params)
         <script data-cfasync="false" src="'.$environmenturl.'" data-client-key="'.$clientkey.'"></script>
         <script data-cfasync="false" type="text/javascript">
         document.addEventListener("DOMContentLoaded", function(event) {
-            function MixpanelTrackResult(token, merchant_id, cms_name, cms_version, plugin_name, status, result) {
+            function MixpanelTrackResult(token, merchant_id, cms_name, cms_version, plugin_name, plugin_version, status, result) {
                 var eventNames = {
                     success: "pg-success",
                     pending: "pg-pending",
@@ -453,6 +457,7 @@ function veritrans_link($params)
                         cms_name: cms_name,
                         cms_version: cms_version,
                         plugin_name: plugin_name,
+                        plugin_version: plugin_version,
                         snap_token: token,
                         payment_type: result ? result.payment_type: null,
                         order_id: result ? result.order_id: null,
@@ -467,6 +472,7 @@ function veritrans_link($params)
             var CMS_NAME = "whmcs";
             var CMS_VERSION = "'.$whmcsVersion.'";
             var PLUGIN_NAME = "whmcs"; 
+            var PLUGIN_VERSION = "'.$pluginVersion.'"; 
 
             function fireSnap(){
                 // record pay event to Mixpanel
@@ -476,12 +482,13 @@ function veritrans_link($params)
                         cms_name: CMS_NAME,
                         cms_version: CMS_VERSION,
                         plugin_name: PLUGIN_NAME,
+                        plugin_version: PLUGIN_VERSION,
                         snap_token: SNAP_TOKEN
                     }
                 );
                 snap.pay("'.$snapToken.'", {
                     onSuccess: function(result){
-                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "success", result);
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, PLUGIN_VERSION, "success", result);
                         try{
                             document.getElementsByClassName("unpaid")[0].innerHTML = "Payment Completed!";
                         } catch (e){}
@@ -491,7 +498,7 @@ function veritrans_link($params)
                     },
                     onPending: function(result){
                         // window.location = "'.$returnUrl.'";
-                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "pending", result);
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, PLUGIN_VERSION, "pending", result);
                         try{
                             document.getElementById("instruction-button").href = result.pdf_url;
                             document.getElementById("snap-instruction").style.display = "block";
@@ -500,11 +507,11 @@ function veritrans_link($params)
                         } catch (e){}
                     },
                     onError: function(result){
-                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "error", result);
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, PLUGIN_VERSION, "error", result);
                         window.location = "'.$returnUrl.'";
                     },
                     onClose: function(){
-                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, "close", null);
+                        MixpanelTrackResult(SNAP_TOKEN, MERCHANT_ID, CMS_NAME, CMS_VERSION, PLUGIN_NAME, PLUGIN_VERSION, "close", null);
                     }
                 });
             }; 

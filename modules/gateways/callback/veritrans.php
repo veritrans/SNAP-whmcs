@@ -97,7 +97,7 @@ if ($gatewayParams['tryToConvertCurrencyBack'] == 'on') {
     } else {
         $converted_amount = $invoice_amount;
     }
-    $paymentAmount = $converted_amount;
+    $paymentAmount = $veritrans_notification->gross_amount;
   } catch (Exception $e) {
     echo "fail to tryToConvertCurrencyBack";
   }

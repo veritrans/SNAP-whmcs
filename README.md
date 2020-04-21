@@ -3,11 +3,11 @@ Midtrans&nbsp; WHMCS Payment Gateway Module
 =====================================
 
 Midtrans&nbsp; :heart: WHMCS!
-Let your WHMCS integrated with Midtrans&nbsp; payment gateway.
+Integrate WHMCS with Midtrans&nbsp; payment gateway, easily allows you to accept payments with Midtrans' [various payment methods](https://midtrans.com/payments).
 
 ### Description
 
-[Midtrans&nbsp;](https://www.midtrans.com) payment gateway is an online payment gateway. We strive to make payments simple for both the merchant and customers. With this plugin you can accept online payment on your WHMCS using [Midtrans&nbsp;](https://www.midtrans.com) payment gateway.
+[Midtrans&nbsp;](https://www.midtrans.com) payment gateway is an online payment gateway. We strive to make payments simple for both the merchant and customers. With this plugin you can start accepting online payment on your WHMCS using [Midtrans&nbsp;](https://www.midtrans.com) payment gateway.
 
 Payment Method Feature:
 - [Midtrans&nbsp;](https://www.midtrans.com) Snap all payment method fullpayment
@@ -24,7 +24,24 @@ Payment Method Feature:
 
 1. [Download](../../archive/master.zip) the modules from this repository.
 2. Extract `snap-whmcs-master.zip` file you have previously downloaded.
-3. Upload & merge `modules` folder that you have extracted into your WHMCS directory `modules` folder. 
+3. Upload (or merge) `modules` folder that you have extracted into your WHMCS directory `modules` folder. 
+
+Sample folder structure
+```
+[Your WHMCS installation folder, it should contains `index.php` file from the whmcs installation]
+  |- [other_folder_from_whmcs]
+  |- [other_folder_from_whmcs]
+  |- [other_folder_from_whmcs]
+  |- modules
+    |- gateways
+      |- veritrans-lib
+      |- veritrans.php
+      |- veritranspromo.php
+      |- callback
+        |- veritrans.php
+```
+
+Or follow this [official guide](https://developers.whmcs.com/payment-gateways/installation-activation/) from WHMCS.
 
 #### Installation & Configuration
 

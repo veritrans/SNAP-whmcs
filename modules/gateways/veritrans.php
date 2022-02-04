@@ -11,7 +11,7 @@
  *
  * Module developed based on official WHMCS Sample Payment Gateway Module
  * https://github.com/WHMCS/sample-merchant-gateway
- * 
+ *
  * @author rizda.prasetya@midtrans.com
  */
 
@@ -196,7 +196,7 @@ function veritrans_config()
 function veritrans_link($params)
 {
     // @TODO: Find proper versioning method
-    // Hardcoded version. 
+    // Hardcoded version.
     $pluginVersion = '1.1';
 
     // Gateway Configuration Parameters
@@ -276,7 +276,7 @@ function veritrans_link($params)
     // $billing_address['country_code'] = (strlen($this->convert_country_code($order->billing_country) != 3 ) ? 'IDN' : $this->convert_country_code($order->billing_country) );
     // error_log("===== country :".$country); //debugan
     $billing_address['country_code'] = (strlen($country) != 3 ) ? 'IDN' : $country;
-    
+
     // Insert array to param
     $customer_details['billing_address'] = $billing_address;
     $params['customer_details'] = $customer_details;
@@ -303,13 +303,13 @@ function veritrans_link($params)
         $terms = array_map(function($e){return (int)$e;}, $terms);
         // Add installment param
         $params['credit_card']['installment']['required'] = false;
-        $params['credit_card']['installment']['terms'] = 
+        $params['credit_card']['installment']['terms'] =
         array(
-          'bri' => $terms, 
-          'danamon' => $terms, 
-          'maybank' => $terms, 
-          'bni' => $terms, 
-          'mandiri' => $terms, 
+          'bri' => $terms,
+          'danamon' => $terms,
+          'maybank' => $terms,
+          'bni' => $terms,
+          'mandiri' => $terms,
           'bca' => $terms,
           'cimb' => $terms
         );
@@ -332,8 +332,8 @@ function veritrans_link($params)
         $time = time();
         $time += 30; // add 30 seconds to allow margin of error
         $params['expiry'] = array(
-            'start_time' => date("Y-m-d H:i:s O",$time), 
-            'unit' => $customExpiryParams[1], 
+            'start_time' => date("Y-m-d H:i:s O",$time),
+            'unit' => $customExpiryParams[1],
             'duration'  => (int)$customExpiryParams[0],
         );
     }
@@ -360,10 +360,24 @@ function veritrans_link($params)
         $snapToken = $snap_transaction->token;
         $redirect_url = $snap_transaction->redirect_url;
         // error_log(" ############# TOKEN ::: ".$snapToken);
+
+        // save snap redirect url to invoice notes
+        $command = 'UpdateInvoice';
+        $postData = array(
+            'invoiceid' => $invoiceId,
+            'notes' => $redirect_url
+        );
+        $results = localAPI($command, $postData);
+
     } catch (Exception $e) {
         // error_log('Caught exception: ',  $e->getMessage(), "\n");
-        if (preg_match('/utilized/',$e->getMessage()) ){
-            return "<h4> Awaiting Your Payment </h4>";
+        if (preg_match('/utilized|digunakan/',$e->getMessage()) ){
+            $command = 'GetInvoice';
+            $postData = array(
+                'invoiceid' => $invoiceId
+            );
+            // Display payment instruction, prevent payment button from being shown
+            return "Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details or open link on Invoice Notes.";
         }
     }
 
@@ -377,29 +391,29 @@ function veritrans_link($params)
     $htmlOutput .= '<input type="submit" value="' . $langPayNow . '" />';
     $htmlOutput .= '</form>';
     // =============================================== End of VT Web =======================
-    
+
     if ($enableSnapRedirect == 'on'){
         return $htmlOutput;
     }
 
 
     // ====================================== Html output for SNAP ====================
-    
+
     $htmlOutput1 = '';
     // JS script
-    
+
     // Bogus form to disable auto submit / redirect
     $htmlOutput1 = '<form onsubmit="return false"></form>';
-    
+
     // $htmlOutput1 .='
-    // <script> 
+    // <script>
     // try {
-    //     document.getElementById("frmPayment").setAttribute("id", "frmPayment-out"); 
+    //     document.getElementById("frmPayment").setAttribute("id", "frmPayment-out");
     // } catch (e){
     //     console.log("failed to stop auto timer for WHMCS 6");
     // }
     // try {
-    //     document.getElementById("submitfrm").setAttribute("id", "submitfrm-out"); 
+    //     document.getElementById("submitfrm").setAttribute("id", "submitfrm-out");
     // } catch (e){
     //     console.log("failed to stop auto timer for WHMCS 5");
     // }
@@ -534,7 +548,7 @@ function veritrans_link($params)
     ';
 
     $htmlOutput1 .= '';
-    
+
     return $htmlOutput1;
 }
 
@@ -615,7 +629,7 @@ function veritrans_refund($params)
  * @return array Transaction response status
  */
 
-/** ## Method 
+/** ## Method
 function veritrans_cancelSubscription($params)
 {
     // Gateway Configuration Parameters

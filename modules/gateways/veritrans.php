@@ -349,35 +349,54 @@ function veritrans_link($params)
         $params['credit_card']['save_card'] = true;
     }
 
-    // Get snap token
-    try {
-        // debug
-        // echo "<pre>";
-        // var_dump($params);
-        // echo "</pre>";
-        // exit();
-        $snap_transaction = Veritrans_Snap::createTransaction($params);
-        $snapToken = $snap_transaction->token;
-        $redirect_url = $snap_transaction->redirect_url;
-        // error_log(" ############# TOKEN ::: ".$snapToken);
+    $command = 'GetInvoice';
+    $postData = array(
+        'invoiceid' => $invoiceId
+    );
+    $invoice = localAPI($command, $postData);
+    $existing_notes = $invoice->notes;
 
-        // save snap redirect url to invoice notes
-        $command = 'UpdateInvoice';
-        $postData = array(
-            'invoiceid' => $invoiceId,
-            'notes' => $redirect_url
-        );
-        $results = localAPI($command, $postData);
+    // Check if Snap URL/token found in invoices notes, then use the existing Snap URL/token
+    if (strpos($existing_notes, "#PayUrl")) {
+        $redirect_url = substr($existing_notes, strpos($existing_notes, 'https'));
+        $snapToken = substr($existing_notes, strpos($existing_notes, '/vtweb/') + 7);
+    } else {
+        // Get snap token
+        try {
+            // debug
+            // echo "<pre>";
+            // var_dump($params);
+            // echo "</pre>";
+            // exit();
+            $snap_transaction = Veritrans_Snap::createTransaction($params);
+            $snapToken = $snap_transaction->token;
+            $redirect_url = $snap_transaction->redirect_url;
+            // error_log(" ############# TOKEN ::: ".$snapToken);
 
-    } catch (Exception $e) {
-        // error_log('Caught exception: ',  $e->getMessage(), "\n");
-        if (preg_match('/utilized|digunakan/',$e->getMessage()) ){
-            $command = 'GetInvoice';
-            $postData = array(
-                'invoiceid' => $invoiceId
-            );
-            // Display payment instruction, prevent payment button from being shown
-            return "Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details or open link on Invoice Notes.";
+            // save snap redirect url to invoice notes
+            try {
+                $command = 'UpdateInvoice';
+                $postData = array(
+                    'invoiceid' => $invoiceId,
+                    'notes' => $existing_notes . '#PayUrl: ' . $redirect_url
+                );
+                localAPI($command, $postData);
+            } catch (Exception $e) {
+                echo "error: unable to update invoice notes";
+            }
+
+        } catch (Exception $e) {
+            // error_log('Caught exception: ',  $e->getMessage(), "\n");
+            if (preg_match('/utilized|digunakan/', $e->getMessage())) {
+                $command = 'GetInvoice';
+                $postData = array(
+                    'invoiceid' => $invoiceId
+                );
+                $results = localAPI($command, $postData);
+                // Display payment instruction, prevent payment button from being shown
+                $PayUrl = substr($results[notes], strpos($results[notes], 'https'));
+                return '<a href="' . $PayUrl . '" class=\"button\">Click to see payment instruction.</a>';
+            }
         }
     }
 

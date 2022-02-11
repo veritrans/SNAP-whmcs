@@ -349,17 +349,23 @@ function veritrans_link($params)
         $params['credit_card']['save_card'] = true;
     }
 
-    $command = 'GetInvoice';
-    $postData = array(
-        'invoiceid' => $invoiceId
-    );
-    $invoice = localAPI($command, $postData);
-    $existing_notes = $invoice->notes;
+    try {
+        $whmcsApiCommand = 'GetInvoice';
+        $whmcsApiPostParams = array(
+            'invoiceid' => $invoiceId
+        );
+        $invoice = localAPI($whmcsApiCommand, $whmcsApiPostParams);
+        $existingInvoiceNotes = $invoice->notes;
+    } catch (Exception $e) {
+        $existingInvoiceNotes = "";
+    }
 
+    $midtransNotesSeparator = "#PayUrl: ";
     // Check if Snap URL/token found in invoices notes, then use the existing Snap URL/token
-    if (strpos($existing_notes, "#PayUrl")) {
-        $redirect_url = substr($existing_notes, strpos($existing_notes, 'https'));
-        $snapToken = substr($existing_notes, strpos($existing_notes, '/vtweb/') + 7);
+    if (strpos($existingInvoiceNotes, $midtransNotesSeparator)) {
+        $redirect_url = substr($existingInvoiceNotes, strpos($existingInvoiceNotes, 'midtrans.com'));
+        $extractToken = explode('/', $existingInvoiceNotes);
+        $snapToken = array_pop($extractToken);
     } else {
         // Get snap token
         try {
@@ -375,12 +381,12 @@ function veritrans_link($params)
 
             // save snap redirect url to invoice notes
             try {
-                $command = 'UpdateInvoice';
-                $postData = array(
+                $whmcsApiCommand = 'UpdateInvoice';
+                $whmcsApiPostParams = array(
                     'invoiceid' => $invoiceId,
-                    'notes' => $existing_notes . '#PayUrl: ' . $redirect_url
+                    'notes' => $existingInvoiceNotes . $midtransNotesSeparator . $redirect_url
                 );
-                localAPI($command, $postData);
+                localAPI($whmcsApiCommand, $whmcsApiPostParams);
             } catch (Exception $e) {
                 echo "error: unable to update invoice notes";
             }
@@ -388,14 +394,8 @@ function veritrans_link($params)
         } catch (Exception $e) {
             // error_log('Caught exception: ',  $e->getMessage(), "\n");
             if (preg_match('/utilized|digunakan/', $e->getMessage())) {
-                $command = 'GetInvoice';
-                $postData = array(
-                    'invoiceid' => $invoiceId
-                );
-                $results = localAPI($command, $postData);
                 // Display payment instruction, prevent payment button from being shown
-                $PayUrl = substr($results[notes], strpos($results[notes], 'https'));
-                return '<a href="' . $PayUrl . '" class=\"button\">Click to see payment instruction.</a>';
+                return "Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details or open link #PayUrl: on Invoice Notes.";
             }
         }
     }

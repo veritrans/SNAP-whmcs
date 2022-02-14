@@ -371,8 +371,8 @@ function veritrans_link($params)
             $redirect_url = $matches[1];
         }
         // get Snap Token from string after the last `/` char of $redirect_url
-        $SnapUrlExplodeResults = explode('/', $redirect_url);
-        $snapToken = end( $SnapUrlExplodeResults );
+        $snapUrlExplodeResults = explode('/', $redirect_url);
+        $snapToken = end( $snapUrlExplodeResults );
     }
 
     // Check if Snap token not found from invoice notes
@@ -406,7 +406,7 @@ function veritrans_link($params)
                 // Display payment instruction, prevent payment button from being shown
                 return "Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details or open link on Invoice Notes.";
             } else {
-                return "Oops, something went wrong when requested Payment token. Error:" . $e->getMessage();
+                return "Midtrans payment module encountered unexpected error when requesting to Snap API. Error message:" . $e->getMessage();
             }
         }
     }

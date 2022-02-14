@@ -197,7 +197,7 @@ function veritrans_link($params)
 {
     // @TODO: Find proper versioning method
     // Hardcoded version.
-    $pluginVersion = '1.1';
+    $pluginVersion = '1.2';
 
     // Gateway Configuration Parameters
     $merchantid = $params['merchantid'];

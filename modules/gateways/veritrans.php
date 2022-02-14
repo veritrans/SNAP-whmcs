@@ -360,13 +360,23 @@ function veritrans_link($params)
         $existingInvoiceNotes = "";
     }
 
-    $midtransNotesSeparator = "#PayUrl: ";
-    // Check if Snap URL/token found in invoices notes, then use the existing Snap URL/token
-    if (strpos($existingInvoiceNotes, $midtransNotesSeparator)) {
-        $redirect_url = substr($existingInvoiceNotes, strpos($existingInvoiceNotes, 'midtrans.com'));
-        $extractToken = explode('/', $existingInvoiceNotes);
-        $snapToken = array_pop($extractToken);
-    } else {
+    $midtransNotesSeparatorBegin = "#PayUrl: ";
+    $midtransNotesSeparatorEnd = " PayUrl#";
+
+    // Check if Snap URL/token found in invoices notes
+    if (strpos($existingInvoiceNotes, $midtransNotesSeparatorBegin)) {
+        // use Regexp to extract existing Snap Url value between Midtrans invoice notes begin & end separator
+        $midtransNotesRegexPattern = "/$midtransNotesSeparatorBegin(.*?)$midtransNotesSeparatorEnd/";
+        if ( preg_match($midtransNotesRegexPattern, $existingInvoiceNotes, $matches) ) {
+            $redirect_url = $matches[1];
+        }
+        // get Snap Token from string after the last `/` char of $redirect_url
+        $SnapUrlExplodeResults = explode('/', $redirect_url);
+        $snapToken = end( $SnapUrlExplodeResults );
+    }
+
+    // Check if Snap token not found from invoice notes
+    if( !isset($snapToken) ){
         // Get snap token
         try {
             // debug
@@ -384,8 +394,7 @@ function veritrans_link($params)
                 $whmcsApiCommand = 'UpdateInvoice';
                 $whmcsApiPostParams = array(
                     'invoiceid' => $invoiceId,
-                    'notes' => $existingInvoiceNotes . $midtransNotesSeparator . $redirect_url
-                );
+                    'notes' => $existingInvoiceNotes . $midtransNotesSeparatorBegin . $redirect_url . $midtransNotesSeparatorEnd                );
                 localAPI($whmcsApiCommand, $whmcsApiPostParams);
             } catch (Exception $e) {
                 echo "error: unable to update invoice notes";
@@ -395,7 +404,9 @@ function veritrans_link($params)
             // error_log('Caught exception: ',  $e->getMessage(), "\n");
             if (preg_match('/utilized|digunakan/', $e->getMessage())) {
                 // Display payment instruction, prevent payment button from being shown
-                return "Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details or open link #PayUrl: on Invoice Notes.";
+                return "Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details or open link on Invoice Notes.";
+            } else {
+                return "Oops, something went wrong when requested Payment token. Error:" . $e->getMessage();
             }
         }
     }

@@ -355,7 +355,7 @@ function veritrans_link($params)
             'invoiceid' => $invoiceId
         );
         $invoice = localAPI($whmcsApiCommand, $whmcsApiPostParams);
-        $existingInvoiceNotes = $invoice['notes'];
+        $existingInvoiceNotes = $invoice->notes;
     } catch (Exception $e) {
         $existingInvoiceNotes = "";
     }
@@ -364,7 +364,7 @@ function veritrans_link($params)
     $midtransNotesSeparatorEnd = " PayUrl#";
 
     // Check if Snap URL/token found in invoices notes
-    if (strpos($existingInvoiceNotes, $midtransNotesSeparatorBegin) !== false) {
+    if (strpos($existingInvoiceNotes, $midtransNotesSeparatorBegin)) {
         // use Regexp to extract existing Snap Url value between Midtrans invoice notes begin & end separator
         $midtransNotesRegexPattern = "/$midtransNotesSeparatorBegin(.*?)$midtransNotesSeparatorEnd/";
         if ( preg_match($midtransNotesRegexPattern, $existingInvoiceNotes, $matches) ) {

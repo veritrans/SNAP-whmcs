@@ -398,7 +398,7 @@ function veritrans_link($params)
             // if there's already midtrans notes
             if(isset($redirectUrlFromNotes)){
                 // use regexp to replace the existing notes instead.
-                $invoiceNotesToWrite = preg_replace($midtransNotesRegexPattern, $newNotesToWrite, $existingInvoiceNotes);
+                $invoiceNotesToWrite = preg_replace($midtransNotesRegexPattern, $midtransNotesToWrite, $existingInvoiceNotes);
             } else {
                 // no existing midtrans notes? append new midtrans notes at the end.
                 $invoiceNotesToWrite = $existingInvoiceNotes . $midtransNotesToWrite;

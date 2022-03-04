@@ -197,7 +197,7 @@ function veritrans_link($params)
 {
     // @TODO: Find proper versioning method
     // Hardcoded version.
-    $pluginVersion = '1.2.1';
+    $pluginVersion = '1.2.2';
 
     // Gateway Configuration Parameters
     $merchantid = $params['merchantid'];
@@ -348,7 +348,15 @@ function veritrans_link($params)
         $params['user_id'] = crypt( $email.$phone , Veritrans_Config::$serverKey );
         $params['credit_card']['save_card'] = true;
     }
-
+    
+    // prefix-suffix string used for invoice.notes read/write
+    // using a explicit prefix string, to prevent customer confusion, as the notes will also be visible even if other PG is selected, on invoice page.
+    $midtransNotesSeparatorBegin = "#midtransPayUrl: ";
+    $midtransNotesSeparatorEnd = " ###";
+    // Regexp to extract value between Midtrans invoice notes begin & end separator
+    $midtransNotesRegexPattern = "/$midtransNotesSeparatorBegin(.*?)$midtransNotesSeparatorEnd/";
+        
+    // Read invoice notes
     try {
         $whmcsApiCommand = 'GetInvoice';
         $whmcsApiPostParams = array(
@@ -360,54 +368,65 @@ function veritrans_link($params)
         $existingInvoiceNotes = "";
     }
 
-    $midtransNotesSeparatorBegin = "#PayUrl: ";
-    $midtransNotesSeparatorEnd = " PayUrl#";
-
-    // Check if Snap URL/token found in invoices notes
+    // Check if Snap URL found in invoices notes
+    $redirectUrlFromNotes = null;
     if (strpos($existingInvoiceNotes, $midtransNotesSeparatorBegin) !== false) {
-        // use Regexp to extract existing Snap Url value between Midtrans invoice notes begin & end separator
-        $midtransNotesRegexPattern = "/$midtransNotesSeparatorBegin(.*?)$midtransNotesSeparatorEnd/";
+        // use Regexp to extract existing Snap Url value
         if ( preg_match($midtransNotesRegexPattern, $existingInvoiceNotes, $matches) ) {
-            $redirect_url = $matches[1];
+            $redirectUrlFromNotes = $matches[1];
         }
-        // get Snap Token from string after the last `/` char of $redirect_url
-        $snapUrlExplodeResults = explode('/', $redirect_url);
-        $snapToken = end( $snapUrlExplodeResults );
     }
 
-    // Check if Snap token not found from invoice notes
-    if( !isset($snapToken) ){
-        // Get snap token
+    /**
+    * Currently Snap token allowed to be created each time invoice page triggers payment creation.
+    * Useful in case merchant send invoice few days early, so that then payment UI will not be limited to 1 day Snap token expiry relative to when customer access invoice the 1st time. 
+    * e.g. Customer can re-open invoice 7 days later, and new Snap token will be generated with renewed expiry (assuming the previous Snap token was not proceeded to `pending` state).
+    * Though if Snap token was proceeded to `pending` state, the payment expiry will follow the pending expiry period. 
+    * So, it is advisable for Merchant to extend their payment methods expiry config via Snap Preferences in Dashboard.
+    **/
+    
+    // create snap token
+    try {
+        
+        $snap_transaction = Veritrans_Snap::createTransaction($params);
+        $snapToken = $snap_transaction->token;
+        $redirect_url = $snap_transaction->redirect_url;
+
+        // save the latest created snap redirect url to invoice notes
         try {
-            // debug
-            // echo "<pre>";
-            // var_dump($params);
-            // echo "</pre>";
-            // exit();
-            $snap_transaction = Veritrans_Snap::createTransaction($params);
-            $snapToken = $snap_transaction->token;
-            $redirect_url = $snap_transaction->redirect_url;
-            // error_log(" ############# TOKEN ::: ".$snapToken);
-
-            // save snap redirect url to invoice notes
-            try {
-                $whmcsApiCommand = 'UpdateInvoice';
-                $whmcsApiPostParams = array(
-                    'invoiceid' => $invoiceId,
-                    'notes' => $existingInvoiceNotes . $midtransNotesSeparatorBegin . $redirect_url . $midtransNotesSeparatorEnd                );
-                localAPI($whmcsApiCommand, $whmcsApiPostParams);
-            } catch (Exception $e) {
-                echo "error: unable to update invoice notes";
-            }
-
-        } catch (Exception $e) {
-            // error_log('Caught exception: ',  $e->getMessage(), "\n");
-            if (preg_match('/utilized|digunakan/', $e->getMessage())) {
-                // Display payment instruction, prevent payment button from being shown
-                return "Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details or open link on Invoice Notes.";
+            $midtransNotesToWrite = $midtransNotesSeparatorBegin . $redirect_url . $midtransNotesSeparatorEnd;
+            // if there's already midtrans notes
+            if(isset($redirectUrlFromNotes)){
+                // use regexp to replace the existing notes instead.
+                $invoiceNotesToWrite = preg_replace($midtransNotesRegexPattern, $newNotesToWrite, $existingInvoiceNotes);
             } else {
-                return "Midtrans payment module encountered unexpected error when requesting to Snap API. Error message:" . $e->getMessage();
+                // no existing midtrans notes? append new midtrans notes at the end.
+                $invoiceNotesToWrite = $existingInvoiceNotes . $midtransNotesToWrite;
             }
+            
+            $whmcsApiCommand = 'UpdateInvoice';
+            $whmcsApiPostParams = array(
+                'invoiceid' => $invoiceId,
+                'notes' => $invoiceNotesToWrite
+            );
+            localAPI($whmcsApiCommand, $whmcsApiPostParams);
+        } catch (Exception $e) {
+            echo "error: unable to update invoice notes"; // @TODO: fix this line, this is not a propper way to display error
+        }
+
+    } catch (Exception $e) {
+        // if Snap API return "Duplicated Order ID", it means the previous Snap token was proceeded to `pending` state. We can't re-create Snap token.
+        if (preg_match('/utilized|digunakan/', $e->getMessage())) {
+            // If there's already Snap URL in invoice notes
+            if (isset($redirectUrlFromNotes)){
+                // Display the Snap URL as instructions.
+                return 'Invoice ID has been created on Midtrans previously. <a href="'. $redirectUrlFromNotes. '">Click here to visit the payment URL</a>, or try to check your email for the previous payment instruction details.';
+            } else {
+                // No Snap URL? Display generic payment instruction advise, prevent payment button from being shown.
+                return 'Invoice ID has been created on Midtrans previously. Please try to check your email for the previous payment instruction details.';
+            }
+        } else {
+            return "Midtrans payment module encountered unexpected error when requesting to Snap API. Error message:" . $e->getMessage();
         }
     }
 

@@ -132,6 +132,11 @@ if ($veritrans_notification->transaction_status == 'capture') {
 else if ($veritrans_notification->transaction_status == 'cancel') {
   $success = false;
 }
+else if ($veritrans_notification->transaction_status == 'expire') {
+    if ($veritrans_notification->payment_type == 'credit_card') {
+        $success = false;
+    }
+}
 else if ($veritrans_notification->transaction_status == 'deny') {
   $success = false;
 }

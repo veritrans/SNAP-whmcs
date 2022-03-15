@@ -16,7 +16,7 @@ Payment Method Feature:
 
 #### Minimum Requirements
 
-* WHMCS v5.3.12 - v7.x or greater (Tested up to WHMCS v7.6 - running well)
+* WHMCS v5.3.12 - v8.x or greater (Tested up to WHMCS v8.3.1 - running well)
 * PHP version 5.4 or greater
 * MySQL version 5.0 or greater
 
@@ -46,7 +46,7 @@ Or follow this [official guide](https://developers.whmcs.com/payment-gateways/in
 #### Installation & Configuration
 
 1. Access your WHMCS admin page.
-2. Go to menu `Setup -> Payments -> Payment Gateways`.
+2. Go to menu `Configuration > System Settings > Payment Gateways (Setup > Payments > Payment Gateways in WHMCS 7.10 and earlier)`.
 3. Click `Midtrans` payment method, then you will be redirected to configuration page. 
 4. Fill the input as instructed on the screen. Click `Save Changes`.
 

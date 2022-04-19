@@ -58,6 +58,14 @@ Or follow this [official guide](https://developers.whmcs.com/payment-gateways/in
    * Unfinish Redirect URL: `http://[your website url]`
    * Error Redirect URL: `http://[your website url]`
 
+#### Log options
+Logging is not something that is always enabled. This is to avoid logs growing too large, so it’s something that needs enabling for the logging to occur.
+If you are experiencing a technical issue with a module, enable logging:
+
+1. Make sure your Administrator role has the View Module Debug Log permission.
+2. Go to `Configuration > System Logs > Module Log (Utilities > Logs > Module Log in WHMCS 7.x and earlier)`.
+3. Switch Module Logging to On.
+
 #### Troubleshooting
 
 If you encounter payment popup not being properly opened on invoice page, try these solution:

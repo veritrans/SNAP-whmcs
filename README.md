@@ -60,11 +60,13 @@ Or follow this [official guide](https://developers.whmcs.com/payment-gateways/in
 
 #### Log options
 Logging is not something that is always enabled. This is to avoid logs growing too large, so it’s something that needs enabling for the logging to occur.
-If you are experiencing a technical issue with a module, enable logging:
+Enabling logging can help you trace what happened and help troubleshoot technical issues.
 
 1. Make sure your Administrator role has the View Module Debug Log permission.
 2. Go to `Configuration > System Logs > Module Log (Utilities > Logs > Module Log in WHMCS 7.x and earlier)`.
 3. Switch Module Logging to On.
+
+You can view the Module logs at `Configuration > System Logs > Module Log (Utilities > Logs > Module Log in WHMCS 7.x and earlier)`
 
 #### Troubleshooting
 

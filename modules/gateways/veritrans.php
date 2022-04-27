@@ -176,6 +176,11 @@ function veritrans_config()
             'Type' => 'yesno',
             'Description' => 'Only use this IF YOU USE OTHER THAN IDR currency, and encounter amount mismatch issue on paid invoice, this will try to convert back to original invoice currency amount (recommended to set it: off)',
         ),
+        'enableLog' => array(
+            'FriendlyName' => 'Enable Debug Log',
+            'Type' => 'yesno',
+            'Description' => 'Tick to enable System Module Debug Log',
+        )
     );
 }
 
@@ -197,7 +202,7 @@ function veritrans_link($params)
 {
     // @TODO: Find proper versioning method
     // Hardcoded version.
-    $pluginVersion = '1.2.2';
+    $pluginVersion = '1.2.3';
 
     // Gateway Configuration Parameters
     $merchantid = $params['merchantid'];
@@ -216,6 +221,7 @@ function veritrans_link($params)
     $enableSnapRedirect = $params['enableSnapRedirect'];
     $useInvoiceAmountAsPaid = $params['useInvoiceAmountAsPaid'];
     $tryToConvertCurrencyBack = $params['tryToConvertCurrencyBack'];
+    $enableLog = $params['enableLog'];
 
     // Invoice Parameters
     $invoiceId = $params['invoiceid'];
@@ -365,6 +371,9 @@ function veritrans_link($params)
         $invoice = localAPI($whmcsApiCommand, $whmcsApiPostParams);
         $existingInvoiceNotes = $invoice["notes"];
     } catch (Exception $e) {
+        if ($enableLog == 'on') {
+            logModuleCall($moduleName, 'get invoice', $whmcsApiPostParams, $e , null, null);
+        }
         $existingInvoiceNotes = "";
     }
 
@@ -411,7 +420,9 @@ function veritrans_link($params)
             );
             localAPI($whmcsApiCommand, $whmcsApiPostParams);
         } catch (Exception $e) {
-            echo "error: unable to update invoice notes"; // @TODO: fix this line, this is not a propper way to display error
+            if ($enableLog == 'on') {
+                logModuleCall($moduleName, 'update invoice', $whmcsApiPostParams, $e , null, null);
+            }
         }
 
     } catch (Exception $e) {
@@ -430,7 +441,19 @@ function veritrans_link($params)
         }
     }
 
-
+    /**
+     * Log module call.
+     *
+     * @param string $module The name of the module
+     * @param string $action The name of the action being performed
+     * @param string|array $requestString The input parameters for the API call
+     * @param string|array $responseData The response data from the API call
+     * @param string|array $processedData The resulting data after any post processing (eg. json decode, xml decode, etc...)
+     * @param array $replaceVars An array of strings for replacement
+     */
+    if ($enableLog == 'on') {
+        logModuleCall($moduleName, 'request snap token', $params, $snap_transaction, null, null);
+    }
 
     // ====================================== Html output for VT Web =======================
     $htmlOutput = '<form method="get" action="' . $redirect_url . '">';
@@ -494,7 +517,7 @@ function veritrans_link($params)
     $mixpanelkey = Veritrans_Config::$isProduction ? "17253088ed3a39b1e2bd2cbcfeca939a" : "9dcba9b440c831d517e8ff1beff40bd9";
 
     $htmlOutput1 .=  '
-        <button class="submit-button" id="snap-pay">Proceed To Payment</button>
+        <button class="submit-button btn btn-primary" id="snap-pay">Proceed To Payment</button>
         <button class="submit-button" id="snap-instruction" style="display:none;">
             <a  target="_blank" href="#" id="instruction-button" title="View Payment Instruction">View Payment Instruction</a>
         </button>
